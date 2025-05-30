@@ -1,0 +1,1 @@
+python -m Interface.main na pasta raiz

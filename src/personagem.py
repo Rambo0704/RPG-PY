@@ -1,5 +1,6 @@
 import time
 import threading
+import random
 class Personagem:
     def __init__(self, nome, vida=100, ataque=20, escudo=0, moedas=100, max_stamina=100):
         self.nome = nome
@@ -22,11 +23,17 @@ class Personagem:
 
     def atacar(self, alvo):
         if self.stamina >= 10:
-            dano = self.ataque
-            dano_causado = alvo.receber_dano(dano)
-            self.stamina -= 10
-            print("Ataque realizado (-10 stamina)")
-            return dano_causado
+            chance_erro = random.random() #numero entre 0 e 1
+            if chance_erro < 0.20: ##probabilidade de 20% de errar
+                print(f"{self.nome} errou o ataque")
+                self.stamina -= 10
+                return 0
+            else:
+                dano = self.ataque
+                dano_causado = alvo.receber_dano(dano)
+                self.stamina -= 10
+                print("Ataque realizado (-10 stamina)")
+                return dano_causado
         else:
             print("Stamina insuficiente para atacar")
             return 0

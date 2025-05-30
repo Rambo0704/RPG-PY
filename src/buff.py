@@ -1,4 +1,4 @@
-from personagem import Personagem
+
 class Buff:
     def __init__(self, nome, atributo, valor, preco, descricao):
         self.nome = nome
@@ -7,6 +7,6 @@ class Buff:
         self.preco = preco
         self.descricao = descricao
 
-    def aplicar(self, personagem):
-        personagem.aplicar_buff(self.atributo, self.valor)
-        print(f"{personagem.nome} aplicou o buff '{self.nome}'!")
+    def aplicar(self, Personagem):
+        Personagem.aplicar_buff(self.atributo, self.valor)
+        print(f"{Personagem.nome} aplicou o buff '{self.nome}'!")

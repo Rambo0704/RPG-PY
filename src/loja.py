@@ -1,5 +1,4 @@
-from buff import Buff
-
+from .buff import Buff
 class Loja:
     def __init__(self):
         self.buffs = [
