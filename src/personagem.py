@@ -1,11 +1,11 @@
 import time
 import threading
 class Personagem:
-    def __init__(self, nome, vida=100, ataque=20, defesa=0, moedas=100, max_stamina=100):
+    def __init__(self, nome, vida=100, ataque=20, escudo=0, moedas=100, max_stamina=100):
         self.nome = nome
         self.vida = vida
         self.ataque = ataque
-        self.defesa = defesa
+        self.escudo = escudo
         self.moedas = moedas
         self.stamina = max_stamina
         self.max_stamina = max_stamina
@@ -15,7 +15,7 @@ class Personagem:
         return self.vida > 0
 
     def receber_dano(self, dano):
-        dano_final = max(dano - self.defesa, 0)
+        dano_final = max(dano - self.escudo, 0)
         self.vida -= dano_final
         self.vida = max(self.vida, 0)
         return dano_final
@@ -71,51 +71,18 @@ class Personagem:
         print(f"\nStatus de {self.nome}:")
         print(f"Vida: {self.vida}")
         print(f"Ataque: {self.ataque}")
-        print(f"Escudo: {self.defesa}")
+        print(f"Escudo: {self.escudo}")
         print(f"Moedas: {self.moedas}")
         print(f"Stamina: {self.stamina}/{self.max_stamina}")
-def teste():
-    p1 = Personagem("Fígado")
-    bot = Personagem("Cerveja",vida=50,ataque=10)
-    turno = 0
-    while p1.esta_vivo() and bot.esta_vivo():
-        print(f"Turno: {turno}\n{p1.nome if turno%2 == 0 else bot.nome} sua vez!")
-        if turno % 2 == 0:
-            p1.mostrar_status()
-            print("Escolha uma ação:")
-            print("1 - Atacar (-10 stamina)")
-            print("2 - Ataque crítico (-30 stamina)")
-            print("3 - Esquivar (-20 stamina)")
-            
 
-            escolha = input("Digite o número da ação: ")   
-            if escolha == "1":
-                dano = p1.atacar(bot)
-                print(f"Você causou {dano} de dano ao {bot.nome}!")
-            elif escolha == "2":
-                dano = p1.critico(bot)
-                print(f"Você causou {dano} de dano crítico ao {bot.nome}!")
-            elif escolha == "3":
-                p1.esquivar()
-            else:
-                print("Ação inválida.")
-
-        else:
-            print("\nTurno do bot!")
-            if escolha == 3:
-                print(f"{p1.nome} esquivou e evitou o ataque do {bot.nome}!")
-            elif bot.stamina >= 10:
-                dano = bot.atacar(p1)
-                print(f"O {bot.nome} causou {dano} de dano em você!")
-            else:
-                print(f"O {bot.nome} está sem stamina e tenta recuperar.")
-                bot.recuperar_stamina()
-
-        turno += 1
-        time.sleep(1.5) 
-
-    if p1.esta_vivo():
-        print("\nVocê venceu!")
-    else:
-        print("\nVocê perdeu!")     
-teste()
+    def aplicar_buff(self, atributo, valor):
+      if atributo == "ataque":
+          self.ataque += valor
+      elif atributo == "escudo":
+           self.escudo += valor
+      elif atributo == "vida":
+          self.vida += valor
+      else:
+          print(f"Atributo {atributo} não reconhecido.")
+        
+      print(f"{self.nome} recebeu +{valor} de {atributo}!")
