@@ -68,7 +68,7 @@ class Personagem:
             print("Iniciando recuperação de stamina...")
             while self.stamina < self.max_stamina:
                 self.stamina += 1
-                time.sleep(1)
+                time.sleep(5)
             print("Stamina cheia!")
             self.recuperando = False
 

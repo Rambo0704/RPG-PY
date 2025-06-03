@@ -1,9 +1,9 @@
-from src.buff import Buff
+
 from src.loja import Loja
 from src.personagem import Personagem
 import time
 
-p1 = Personagem("Figado",max_stamina=0)
+p1 = Personagem("Figado")
 bot = Personagem("Cerveja", vida=50, ataque=10)
 turno = 0
 
@@ -47,7 +47,7 @@ while p1.esta_vivo() and bot.esta_vivo():
         else:
             print(f"O {bot.nome} está sem stamina e tenta recuperar.")
             bot.recuperar_stamina()
-
+        p1.recuperar_stamina()
     turno += 1
     time.sleep(1.5)
 
@@ -57,23 +57,21 @@ else:
     print("\nVocê perdeu!")
 
 time.sleep(1.5)
-print("\n\n\n MOMENTO DE COMPRAS NA LOJA!!")
-loja = Loja
-loja.mostrar_buffs()
-escolha = None
-while escolha != 0:
-    
-    if escolha == 1:
-        loja.comprar_buff(1,p1)
-    elif escolha == 2:
-        loja.comprar_buff(2,p1)
-    elif escolha == 3:
-        loja.comprar_buff(3,p1)
-    elif escolha == 4:
-        loja.comprar_buff(4,p1)
-    elif escolha == 0:
+loja = Loja()
+while True:
+    print("\n\n\nMOMENTO DE COMPRAS NA LOJA!!")
+    print(f"\nSuas Moedas: {p1.moedas}\n")
+    loja.mostrar_buffs()
+
+    try:
+        escolha = int(input("Qual buff você deseja? "))
+    except ValueError:
+        print("Por favor, digite um número válido.")
+        continue
+
+    if escolha == 0:
         print("Saindo da loja...\n")
-        time.sleep(1.5)
         p1.mostrar_status()
+        break
     else:
-        print("Opção Invalida")
+        loja.comprar_buff(escolha, p1)
