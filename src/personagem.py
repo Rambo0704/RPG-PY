@@ -40,11 +40,17 @@ class Personagem:
 
     def critico(self, alvo):
         if self.stamina >= 30:
-            critico = self.ataque * 2
-            critico_causado = alvo.receber_dano(critico)
-            self.stamina -= 30
-            print("Ataque crítico realizado (-30 stamina)")
-            return critico_causado
+            chance_erro = random.random()
+            if chance_erro < 0.40:
+                print(f"{self.nome} errou atque critico")
+                self.stamina -= 30
+                return 0
+            else:
+                critico = self.ataque * 2
+                critico_causado = alvo.receber_dano(critico)
+                self.stamina -= 30
+                print("Ataque crítico realizado (-30 stamina)")
+                return critico_causado
         else:
             print("Stamina insuficiente para ataque crítico")
             return 0
