@@ -1,9 +1,12 @@
 import pygame
+import threading
 from src.personagem import Personagem
 
 def executar_batalha_visual(jogador, inimigo):
+    semaforo_jogador = threading.Semaphore(1)
+    semaforo_inimigo = threading.Semaphore(0)
     pygame.init()
-    screen = pygame.display.set_mode((1488, 554))
+    screen = pygame.display.set_mode((720, 480))
     pygame.display.set_caption("Combate RPG")
     font = pygame.font.Font(None, 30)
     clock = pygame.time.Clock()
@@ -13,13 +16,13 @@ def executar_batalha_visual(jogador, inimigo):
     BLUE = (0, 0, 200)
     GRAY = (50, 50, 50)
 
-    fundo = pygame.image.load("imagens/arena2.png").convert()
-    fundo = pygame.transform.scale(fundo, (1488, 554))
+    fundo = pygame.image.load("Interface/sprites/arena.jpg").convert()
+    fundo = pygame.transform.scale(fundo, (800, 600))
 
-    sprite_jogador = pygame.image.load("imagens/figado.png").convert_alpha()
+    sprite_jogador = pygame.image.load("Interface/sprites/figado_transparente.png").convert_alpha()
     sprite_jogador = pygame.transform.scale(sprite_jogador, (150, 150))
 
-    sprite_inimigo = pygame.image.load("imagens/alcool.png").convert_alpha()
+    sprite_inimigo = pygame.image.load("Interface/sprites/alcool_transparente.png").convert_alpha()
     sprite_inimigo = pygame.transform.scale(sprite_inimigo, (150, 150))
 
     def draw_bar(surface, x, y, max_val, current_val, color, label):
@@ -34,6 +37,7 @@ def executar_batalha_visual(jogador, inimigo):
 
     mensagem = "O combate começou!"
     turno_jogador = True
+    semaforo_jogador.release()
     running = True
 
     while running:
@@ -45,25 +49,35 @@ def executar_batalha_visual(jogador, inimigo):
                 return "fugiu"
 
             if turno_jogador and event.type == pygame.KEYDOWN:
-                jogador.recuperar_stamina()
+                semaforo_jogador.acquire()
                 if event.key == pygame.K_1:
                     dano = jogador.atacar(inimigo)
                     mensagem = f"{jogador.nome} atacou! Dano: {dano}"
                     turno_jogador = False
+                    semaforo_inimigo.release()
                 elif event.key == pygame.K_2:
                     esquivou = jogador.esquivar()
                     mensagem = f"{jogador.nome} tentou esquivar." if esquivou else "Stamina insuficiente."
                     turno_jogador = False
+                    semaforo_inimigo.release()
                 elif event.key == pygame.K_3:
                     dano = jogador.critico(inimigo)
                     mensagem = f"Ataque crítico! Dano: {dano}"
                     turno_jogador = False
+                    semaforo_inimigo.release()
+                elif event.key == pygame.K_4:
+                    jogador.recuperar_stamina()
+                    mensagem = "Recuperando stamina..."
+                    turno_jogador = False
+                    semaforo_inimigo.release()
+
         if not turno_jogador and jogador.esta_vivo() and inimigo.esta_vivo():
-            inimigo.recuperar_stamina()
+            semaforo_inimigo.acquire()
             pygame.time.delay(1000)
             dano = inimigo.atacar(jogador)
             mensagem = f"{inimigo.nome} atacou! Dano: {dano}"
             turno_jogador = True
+            semaforo_jogador.release()
 
         if not jogador.esta_vivo():
             mensagem = "Você perdeu!"
