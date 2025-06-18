@@ -24,7 +24,7 @@ class Personagem:
     def atacar(self, alvo):
         if self.stamina >= 10:
             chance_erro = random.random() #numero entre 0 e 1
-            if chance_erro < 0.20: ##probabilidade de 20% de errar
+            if chance_erro < 0.30: ##probabilidade de 20% de errar
                 print(f"{self.nome} errou o ataque")
                 self.stamina -= 10
                 return 0
@@ -41,7 +41,7 @@ class Personagem:
     def critico(self, alvo):
         if self.stamina >= 30:
             chance_erro = random.random()
-            if chance_erro < 0.40:
+            if chance_erro < 0.50:
                 print(f"{self.nome} errou atque critico")
                 self.stamina -= 30
                 return 0
@@ -74,7 +74,7 @@ class Personagem:
             print("Iniciando recuperação de stamina...")
             while self.stamina < self.max_stamina:
                 self.stamina += 1
-                time.sleep(5)
+                time.sleep(1)
             print("Stamina cheia!")
             self.recuperando = False
 
