@@ -24,7 +24,7 @@ class Personagem:
     def atacar(self, alvo):
         if self.stamina >= 10:
             chance_erro = random.random() #numero entre 0 e 1
-            if chance_erro < 0.30: ##probabilidade de 20% de errar
+            if chance_erro < 0.30: ##probabilidade de 30% de errar
                 print(f"{self.nome} errou o ataque")
                 self.stamina -= 10
                 return 0
