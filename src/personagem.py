@@ -2,9 +2,10 @@ import time
 import threading
 import random
 class Personagem:
-    def __init__(self, nome, vida=100, ataque=20, escudo=0, moedas=100, max_stamina=100):
+    def __init__(self, nome, max_vida=100, ataque=20, escudo=0, moedas=100, max_stamina=100):
         self.nome = nome
-        self.vida = vida
+        self.vida = max_vida
+        self.max_vida = max_vida
         self.ataque = ataque
         self.escudo = escudo
         self.moedas = moedas
