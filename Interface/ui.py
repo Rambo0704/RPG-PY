@@ -49,11 +49,83 @@ def desenhar_botao(screen, texto, x, y, largura, altura, font):
     screen.blit(txt_surf, txt_rect)
     return rect
 
-def mostrar_tela_final(screen, mensagem_final, cor_fundo, font_grande):
+def mostrar_tela_final(screen, mensagem_final, font_grande):
     largura_tela, altura_tela = screen.get_size()
-    screen.fill(cor_fundo)
+    screen.fill("Interface/UI/wood_floor.jpg")
     texto = font_grande.render(mensagem_final, True, WHITE)
     texto_rect = texto.get_rect(center=(largura_tela // 2, altura_tela // 2))
     screen.blit(texto, texto_rect)
     pygame.display.flip()
     pygame.time.delay(3000)
+class Button:
+    def __init__(self, image, x_pos, y_pos, text_input=None, font=None,
+                 base_color=(255, 255, 255), hover_color=(181, 101, 29), hover_scale=1.1):
+        self.original_image = image  # guarda imagem original
+        self.image = image
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.font = font
+        self.base_color = base_color
+        self.hover_color = hover_color
+        self.text_input = text_input
+        self.hover_scale = hover_scale
+        self.clicked = False
+        self.is_hovered = False
+
+        # Renderizar texto, se houver
+        if self.text_input and self.font:
+            self.text = self.font.render(self.text_input, True, self.base_color)
+            self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
+        else:
+            self.text = None
+            self.text_rect = None
+
+        # Rect da imagem
+        if self.image is not None:
+            self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
+        else:
+            self.rect = pygame.Rect(0, 0, 200, 50)
+            self.rect.center = (self.x_pos, self.y_pos)
+
+    def update(self, surface):
+        # Desenha imagem (já pode estar redimensionada)
+        if self.image is not None:
+            surface.blit(self.image, self.rect)
+        else:
+            pygame.draw.rect(surface, "gray", self.rect, border_radius=10)
+
+        # Desenha texto se existir
+        if self.text:
+            surface.blit(self.text, self.text_rect)
+
+    def changeColor(self, position):
+        hovering = self.rect.collidepoint(position)
+
+        # Hover visual no texto
+        if self.text and self.font:
+            color = self.hover_color if hovering else self.base_color
+            self.text = self.font.render(self.text_input, True, color)
+            self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
+
+        # Hover visual na imagem
+        if self.image and hovering != self.is_hovered:
+            self.is_hovered = hovering
+            if hovering:
+                # aumenta imagem
+                width = int(self.original_image.get_width() * self.hover_scale)
+                height = int(self.original_image.get_height() * self.hover_scale)
+                self.image = pygame.transform.scale(self.original_image, (width, height))
+            else:
+                # volta ao normal
+                self.image = self.original_image
+
+            self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
+
+    def checkClick(self, position):
+        if self.rect.collidepoint(position):
+            if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
+                self.clicked = True
+                return True
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+        return False

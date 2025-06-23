@@ -34,7 +34,7 @@ def rodar_jogo():
     while True:
         if estado_atual == telas.ESTADO_TELA_INICIAL:
             nivel_fase_atual = 0
-            estado_atual = telas.tela_inicial(screen, clock, fontes)
+            estado_atual = telas.tela_inicial()
 
         elif estado_atual == telas.ESTADO_EM_BATALHA:
             if nivel_fase_atual >= len(FASES):

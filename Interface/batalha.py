@@ -2,8 +2,9 @@ import pygame
 import threading
 from src.personagem import Personagem
 import random
-from Interface import ui, sprites
+from Interface import ui, sprites,telas
 from src import utils
+from src.loja import Loja
 
 def executar_batalha_visual(jogador, inimigo, caminhos_recursos, mensagem_vitoria):
     semaforo_jogador = threading.Semaphore(1)
@@ -160,8 +161,8 @@ def executar_batalha_visual(jogador, inimigo, caminhos_recursos, mensagem_vitori
             ui.mostrar_tela_final(screen, "VOCÊ SUCUMBIU PRA CIRROSE", (120, 0, 0), fontes['grande'])
             return "derrota"
         elif not inimigo.esta_vivo():
-            # Mostra a mensagem de vitória específica da fase
-            ui.mostrar_tela_final(screen, mensagem_vitoria, (0, 100, 0), fontes['grande'])
+
+            telas.executar_loja(Loja,jogador)
             return "vitoria"
 
         pygame.display.flip()
