@@ -2,7 +2,7 @@ import pygame
 import threading
 from src.personagem import Personagem
 import random
-from Interface import ui, sprites,telas
+from Interface import ui, sprites, telas
 from src import utils
 from src.loja import Loja
 
@@ -14,7 +14,7 @@ def executar_batalha_visual(jogador, inimigo, caminhos_recursos, mensagem_vitori
 
     thread_musica = threading.Thread(
         target=utils.iniciar_musica,
-        args=(caminho_musica_fase,) 
+        args=(caminho_musica_fase,)
     )
     thread_musica.daemon = True
     thread_musica.start()
@@ -24,13 +24,45 @@ def executar_batalha_visual(jogador, inimigo, caminhos_recursos, mensagem_vitori
     largura_tela, altura_tela = info.current_w, info.current_h
     screen = pygame.display.set_mode((largura_tela, altura_tela), pygame.FULLSCREEN)
     pygame.display.set_caption("Combate RPG")
-    
+
     fontes = {
-        'padrao': pygame.font.SysFont("arial", 30),
+        'padrao': pygame.font.SysFont("arial", 36),
         'nome': pygame.font.SysFont("arial", 36, bold=True),
         'grande': pygame.font.SysFont("arial", 48, bold=True)
     }
     clock = pygame.time.Clock()
+    
+    LARGURA_BOTAO, ALTURA_BOTAO = 220, 220
+    
+    BRANCO = (255, 255, 255)
+    PRETO = (0, 0, 0)
+    VERMELHO_ESCURO = (120, 0, 0)
+    
+    offsets_borda = [(-1, -1), (-1, 1), (1, -1), (1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    botoes_img = {}
+    botoes_img_hover = {}
+    usar_imagens_botoes = False
+    try:
+        img_atacar_orig = pygame.image.load("Interface/UI/atacar_button.png").convert_alpha()
+        img_critico_orig = pygame.image.load("Interface/UI/critico_button.png").convert_alpha()
+        img_esquivar_orig = pygame.image.load("Interface/UI/esquivar2_button.png").convert_alpha()
+        img_recuperar_orig = pygame.image.load("Interface/UI/recuperar_button.png").convert_alpha()
+
+        botoes_img['atacar'] = pygame.transform.scale(img_atacar_orig, (LARGURA_BOTAO, ALTURA_BOTAO))
+        botoes_img['critico'] = pygame.transform.scale(img_critico_orig, (LARGURA_BOTAO, ALTURA_BOTAO))
+        botoes_img['esquivar'] = pygame.transform.scale(img_esquivar_orig, (LARGURA_BOTAO, ALTURA_BOTAO))
+        botoes_img['recuperar'] = pygame.transform.scale(img_recuperar_orig, (LARGURA_BOTAO, ALTURA_BOTAO))
+        
+        for nome, img in botoes_img.items():
+            img_hover = img.copy()
+            img_hover.fill((50, 50, 50), special_flags=pygame.BLEND_RGB_ADD)
+            botoes_img_hover[nome] = img_hover
+        
+        usar_imagens_botoes = True
+    except pygame.error:
+        print("Aviso: Imagens dos botões não encontradas. Usando botões padrão.")
+        usar_imagens_botoes = False
 
     recursos = sprites.carregar_recursos_batalha(
         largura_tela, altura_tela,
@@ -40,18 +72,16 @@ def executar_batalha_visual(jogador, inimigo, caminhos_recursos, mensagem_vitori
     fundo = recursos['fundo']
     sprite_jogador = recursos['jogador']
     sprite_inimigo = recursos['inimigo']
-    
-    # Organiza dados em dicionários para passar para outras funções
+
     posicoes = {
         'jogador_x': int(largura_tela * 0.15),
         'inimigo_x': largura_tela - sprite_inimigo.get_width() - int(largura_tela * 0.15),
-        'personagem_y': altura_tela - sprite_jogador.get_height() + 40
+        'personagem_y': altura_tela - sprite_jogador.get_height() - 20
     }
     JOGADOR_X_BASE, INIMIGO_X_BASE, PERSONAGEM_Y = posicoes['jogador_x'], posicoes['inimigo_x'], posicoes['personagem_y']
 
     personagens = {'jogador': jogador, 'inimigo': inimigo}
-    
-    # Variáveis de estado da batalha
+
     mensagem = "O combate começou!"
     turno_jogador = True
     running = True
@@ -62,38 +92,75 @@ def executar_batalha_visual(jogador, inimigo, caminhos_recursos, mensagem_vitori
     semaforo_jogador.release()
 
     while running:
-
+        mx, my = pygame.mouse.get_pos()
+        
         screen.blit(fundo, (0, 0))
         screen.blit(sprite_jogador, (JOGADOR_X_BASE, PERSONAGEM_Y))
         screen.blit(sprite_inimigo, (INIMIGO_X_BASE, PERSONAGEM_Y))
 
-   
         hud_jog_x = JOGADOR_X_BASE + sprite_jogador.get_width() // 2
         hud_jog_y = PERSONAGEM_Y - 100
-        ui.draw_text(screen, f"{jogador.nome}", hud_jog_x, hud_jog_y, fontes['nome'], center=True)
+        
+        # Desenha nome do jogador com borda
+        texto_surf = fontes['nome'].render(f"{jogador.nome}", True, BRANCO)
+        texto_rect = texto_surf.get_rect(center=(hud_jog_x, hud_jog_y))
+        borda_surf = fontes['nome'].render(f"{jogador.nome}", True, PRETO)
+        for offset_x, offset_y in offsets_borda:
+            screen.blit(borda_surf, (texto_rect.x + offset_x, texto_rect.y + offset_y))
+        screen.blit(texto_surf, texto_rect)
+
         ui.draw_bar(screen, hud_jog_x - ui.LARGURA_BARRA_HUD // 2, hud_jog_y + 30, jogador.max_vida, jogador.vida, ui.RED)
         ui.draw_bar(screen, hud_jog_x - ui.LARGURA_BARRA_HUD // 2, hud_jog_y + 65, jogador.max_stamina, jogador.stamina, ui.BLUE)
 
-        # HUD do Inimigo
         inimigo_nome_x = INIMIGO_X_BASE + sprite_inimigo.get_width() // 2
         inimigo_nome_y = PERSONAGEM_Y - 100
-        ui.draw_text(screen, f"{inimigo.nome}", inimigo_nome_x, inimigo_nome_y, fontes['nome'], center=True)
+
+        # Desenha nome do inimigo com borda
+        texto_surf = fontes['nome'].render(f"{inimigo.nome}", True, BRANCO)
+        texto_rect = texto_surf.get_rect(center=(inimigo_nome_x, inimigo_nome_y))
+        borda_surf = fontes['nome'].render(f"{inimigo.nome}", True, PRETO)
+        for offset_x, offset_y in offsets_borda:
+            screen.blit(borda_surf, (texto_rect.x + offset_x, texto_rect.y + offset_y))
+        screen.blit(texto_surf, texto_rect)
+
         ui.draw_bar(screen, inimigo_nome_x - ui.LARGURA_BARRA_HUD // 2, inimigo_nome_y + 30, inimigo.max_vida, inimigo.vida, ui.RED)
-        
 
-        ui.draw_text(screen, mensagem, largura_tela // 2, altura_tela // 4, fontes['grande'], center=True)
+        # Desenha mensagem de combate com borda
+        texto_surf = fontes['grande'].render(mensagem, True, BRANCO)
+        texto_rect = texto_surf.get_rect(center=(largura_tela // 2, 50))
+        borda_surf = fontes['grande'].render(mensagem, True, PRETO)
+        for offset_x, offset_y in offsets_borda:
+            screen.blit(borda_surf, (texto_rect.x + offset_x, texto_rect.y + offset_y))
+        screen.blit(texto_surf, texto_rect)
 
+        botoes_rect = {}
         if turno_jogador:
-            LARGURA_BOTAO, ALTURA_BOTAO, ESPACO = 200, 55, 15
-            x_botoes = JOGADOR_X_BASE - LARGURA_BOTAO - 40
-            y_base = altura_tela // 2 - (2 * (ALTURA_BOTAO + ESPACO)) + 100
+            ESPACO = 25
+            num_botoes = 4 if not recuperou_stamina else 3
+            largura_total_botoes = (num_botoes * LARGURA_BOTAO) + ((num_botoes - 1) * ESPACO)
+            
+            x_inicial = (largura_tela - largura_total_botoes) // 2
+            y_botoes = altura_tela - ALTURA_BOTAO - 40
 
-            botao_atacar = ui.desenhar_botao(screen, "Atacar", x_botoes, y_base, LARGURA_BOTAO, ALTURA_BOTAO, fontes['padrao'])
-            botao_critico = ui.desenhar_botao(screen, "Crítico", x_botoes, y_base + (ALTURA_BOTAO + ESPACO), LARGURA_BOTAO, ALTURA_BOTAO, fontes['padrao'])
-            botao_esquivar = ui.desenhar_botao(screen, "Esquivar", x_botoes, y_base + (ALTURA_BOTAO + ESPACO) * 2, LARGURA_BOTAO, ALTURA_BOTAO, fontes['padrao'])
-            botao_recuperar = None
+            nomes_botoes = ['atacar', 'critico', 'esquivar']
             if not recuperou_stamina:
-                botao_recuperar = ui.desenhar_botao(screen, "Recuperar", x_botoes, y_base + (ALTURA_BOTAO + ESPACO) * 3, LARGURA_BOTAO, ALTURA_BOTAO, fontes['padrao'])
+                nomes_botoes.append('recuperar')
+            
+            for i, nome in enumerate(nomes_botoes):
+                x_pos = x_inicial + i * (LARGURA_BOTAO + ESPACO)
+                rect = pygame.Rect(x_pos, y_botoes, LARGURA_BOTAO, ALTURA_BOTAO)
+                botoes_rect[nome] = rect
+                
+                hovered = rect.collidepoint(mx, my)
+
+                if usar_imagens_botoes:
+                    if hovered:
+                        screen.blit(botoes_img_hover[nome], rect.topleft)
+                    else:
+                        screen.blit(botoes_img[nome], rect.topleft)
+                else:
+                    cor = ui.BRIGHT_BLUE if hovered else ui.BLUE
+                    ui.desenhar_botao(screen, nome.capitalize(), x_pos, y_botoes, LARGURA_BOTAO, ALTURA_BOTAO, fontes['padrao'], cor_fundo=cor)
 
 
         for event in pygame.event.get():
@@ -101,27 +168,24 @@ def executar_batalha_visual(jogador, inimigo, caminhos_recursos, mensagem_vitori
                 running = False
                 return "fugiu"
 
-  
             if turno_jogador and event.type == pygame.MOUSEBUTTONDOWN:
-                mx, my = pygame.mouse.get_pos()
                 acao_realizada = False
-
-                if botao_atacar.collidepoint(mx, my):
+                if 'atacar' in botoes_rect and botoes_rect['atacar'].collidepoint(mx, my):
                     dano = jogador.atacar(inimigo)
                     mensagem = f"Você atacou! Dano: {dano}" if dano != 0 else "Você errou o ataque."
                     sprites.animar_acao(screen, clock, recursos, personagens, posicoes, mensagem, "jogador", "ataque", fontes)
                     acao_realizada = True
-                elif botao_esquivar.collidepoint(mx, my):
-                    esquivou = jogador.esquivar()
-                    mensagem = "Você tentou esquivar." if esquivou else "Stamina insuficiente."
-                    sprites.animar_acao(screen, clock, recursos, personagens, posicoes, mensagem, "jogador", "esquiva", fontes)
-                    acao_realizada = True
-                elif botao_critico.collidepoint(mx, my):
+                elif 'critico' in botoes_rect and botoes_rect['critico'].collidepoint(mx, my):
                     dano = jogador.critico(inimigo)
                     mensagem = f"Ataque crítico! Dano: {dano}" if dano != 0 else "Você errou o crítico."
                     sprites.animar_acao(screen, clock, recursos, personagens, posicoes, mensagem, "jogador", "ataque", fontes)
                     acao_realizada = True
-                elif botao_recuperar and botao_recuperar.collidepoint(mx, my):
+                elif 'esquivar' in botoes_rect and botoes_rect['esquivar'].collidepoint(mx, my):
+                    esquivou = jogador.esquivar()
+                    mensagem = "Você tentou esquivar." if esquivou else "Stamina insuficiente."
+                    sprites.animar_acao(screen, clock, recursos, personagens, posicoes, mensagem, "jogador", "esquiva", fontes)
+                    acao_realizada = True
+                elif 'recuperar' in botoes_rect and botoes_rect['recuperar'].collidepoint(mx, my):
                     jogador.recuperar_stamina()
                     mensagem = "Você recuperou stamina!"
                     recuperou_stamina = True
@@ -135,7 +199,7 @@ def executar_batalha_visual(jogador, inimigo, caminhos_recursos, mensagem_vitori
 
         if aguardando_acao_inimigo and pygame.time.get_ticks() >= tempo_acao_inimigo:
             semaforo_inimigo.acquire()
-            if random.random() < 0.20 and inimigo.stamina >= 30: # 20% de chance de crítico
+            if random.random() < 0.20 and inimigo.stamina >= 30:
                 if esquivou:
                     mensagem = "Você esquivou do ataque crítico!"
                     esquivou = False
@@ -151,23 +215,33 @@ def executar_batalha_visual(jogador, inimigo, caminhos_recursos, mensagem_vitori
                     dano = inimigo.atacar(jogador)
                     mensagem = f"{inimigo.nome} atacou! Dano: {dano}" if dano != 0 else f"{inimigo.nome} errou."
                     sprites.animar_acao(screen, clock, recursos, personagens, posicoes, mensagem, "inimigo", "ataque", fontes)
-            
+
             turno_jogador = True
             aguardando_acao_inimigo = False
             recuperou_stamina = False
-            esquivou = False # Reseta a esquiva no final do turno do inimigo
+            esquivou = False
             semaforo_jogador.release()
+
         if not jogador.esta_vivo():
-            ui.mostrar_tela_final(screen, "VOCÊ SUCUMBIU PRA CIRROSE", (120, 0, 0), fontes['grande'])
+            screen.fill(VERMELHO_ESCURO)
+            
+            texto_final = "VOCÊ SUCUMBIU PRA CIRROSE"
+            texto_surf = fontes['grande'].render(texto_final, True, BRANCO)
+            texto_rect = texto_surf.get_rect(center=(largura_tela // 2, altura_tela // 2))
+            borda_surf = fontes['grande'].render(texto_final, True, PRETO)
+            for offset_x, offset_y in offsets_borda:
+                screen.blit(borda_surf, (texto_rect.x + offset_x, texto_rect.y + offset_y))
+            screen.blit(texto_surf, texto_rect)
+
+            pygame.display.flip()
+            pygame.time.wait(3000)
             return "derrota"
         elif not inimigo.esta_vivo():
-
             telas.executar_loja(Loja,jogador)
             return "vitoria"
 
         pygame.display.flip()
         clock.tick(60)
 
-    # --- FINALIZAÇÃO ---
     pygame.mixer.music.stop()
     pygame.quit()

@@ -72,7 +72,7 @@ class Button:
         self.clicked = False
         self.is_hovered = False
 
-        # Renderizar texto, se houver
+        
         if self.text_input and self.font:
             self.text = self.font.render(self.text_input, True, self.base_color)
             self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
@@ -80,7 +80,7 @@ class Button:
             self.text = None
             self.text_rect = None
 
-        # Rect da imagem
+        
         if self.image is not None:
             self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
         else:
@@ -88,35 +88,35 @@ class Button:
             self.rect.center = (self.x_pos, self.y_pos)
 
     def update(self, surface):
-        # Desenha imagem (já pode estar redimensionada)
+       
         if self.image is not None:
             surface.blit(self.image, self.rect)
         else:
             pygame.draw.rect(surface, "gray", self.rect, border_radius=10)
 
-        # Desenha texto se existir
+        
         if self.text:
             surface.blit(self.text, self.text_rect)
 
     def changeColor(self, position):
         hovering = self.rect.collidepoint(position)
 
-        # Hover visual no texto
+        
         if self.text and self.font:
             color = self.hover_color if hovering else self.base_color
             self.text = self.font.render(self.text_input, True, color)
             self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
 
-        # Hover visual na imagem
+        
         if self.image and hovering != self.is_hovered:
             self.is_hovered = hovering
             if hovering:
-                # aumenta imagem
+                
                 width = int(self.original_image.get_width() * self.hover_scale)
                 height = int(self.original_image.get_height() * self.hover_scale)
                 self.image = pygame.transform.scale(self.original_image, (width, height))
             else:
-                # volta ao normal
+            
                 self.image = self.original_image
 
             self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
