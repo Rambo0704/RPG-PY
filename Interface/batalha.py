@@ -6,7 +6,7 @@ from Interface import ui, sprites, telas
 from src import utils
 from src.loja import Loja
 
-def executar_batalha_visual(jogador, inimigo, caminhos_recursos, mensagem_vitoria):
+def executar_batalha_visual(jogador, inimigo, caminhos_recursos, loja=None):
     semaforo_jogador = threading.Semaphore(1)
     semaforo_inimigo = threading.Semaphore(0)
 
@@ -101,7 +101,6 @@ def executar_batalha_visual(jogador, inimigo, caminhos_recursos, mensagem_vitori
         hud_jog_x = JOGADOR_X_BASE + sprite_jogador.get_width() // 2
         hud_jog_y = PERSONAGEM_Y - 100
         
-        # Desenha nome do jogador com borda
         texto_surf = fontes['nome'].render(f"{jogador.nome}", True, BRANCO)
         texto_rect = texto_surf.get_rect(center=(hud_jog_x, hud_jog_y))
         borda_surf = fontes['nome'].render(f"{jogador.nome}", True, PRETO)
@@ -115,7 +114,6 @@ def executar_batalha_visual(jogador, inimigo, caminhos_recursos, mensagem_vitori
         inimigo_nome_x = INIMIGO_X_BASE + sprite_inimigo.get_width() // 2
         inimigo_nome_y = PERSONAGEM_Y - 100
 
-        # Desenha nome do inimigo com borda
         texto_surf = fontes['nome'].render(f"{inimigo.nome}", True, BRANCO)
         texto_rect = texto_surf.get_rect(center=(inimigo_nome_x, inimigo_nome_y))
         borda_surf = fontes['nome'].render(f"{inimigo.nome}", True, PRETO)
@@ -125,7 +123,6 @@ def executar_batalha_visual(jogador, inimigo, caminhos_recursos, mensagem_vitori
 
         ui.draw_bar(screen, inimigo_nome_x - ui.LARGURA_BARRA_HUD // 2, inimigo_nome_y + 30, inimigo.max_vida, inimigo.vida, ui.RED)
 
-        # Desenha mensagem de combate com borda
         texto_surf = fontes['grande'].render(mensagem, True, BRANCO)
         texto_rect = texto_surf.get_rect(center=(largura_tela // 2, 50))
         borda_surf = fontes['grande'].render(mensagem, True, PRETO)
@@ -223,23 +220,14 @@ def executar_batalha_visual(jogador, inimigo, caminhos_recursos, mensagem_vitori
             semaforo_jogador.release()
 
         if not jogador.esta_vivo():
-            screen.fill(VERMELHO_ESCURO)
-            
-            texto_final = "VOCÊ SUCUMBIU PRA CIRROSE"
-            texto_surf = fontes['grande'].render(texto_final, True, BRANCO)
-            texto_rect = texto_surf.get_rect(center=(largura_tela // 2, altura_tela // 2))
-            borda_surf = fontes['grande'].render(texto_final, True, PRETO)
-            for offset_x, offset_y in offsets_borda:
-                screen.blit(borda_surf, (texto_rect.x + offset_x, texto_rect.y + offset_y))
-            screen.blit(texto_surf, texto_rect)
-
-            pygame.display.flip()
-            pygame.time.wait(3000)
+            telas.tela_derrota()
             return "derrota"
+        
         elif not inimigo.esta_vivo():
-            telas.executar_loja(Loja,jogador)
+            if loja:
+                telas.executar_loja(loja, jogador)
             return "vitoria"
-
+        
         pygame.display.flip()
         clock.tick(60)
 
