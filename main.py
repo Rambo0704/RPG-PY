@@ -40,12 +40,12 @@ def rodar_jogo():
 
     estado_atual = telas.ESTADO_TELA_INICIAL
     nivel_fase_atual = 0
-    jogador = Personagem(nome="Fígado",ataque=180)
+    jogador = Personagem(nome="Fígado")
 
     while True:
         if estado_atual == telas.ESTADO_TELA_INICIAL:
             nivel_fase_atual = 0
-            jogador = Personagem(nome="Fígado",ataque=180)
+            jogador = Personagem(nome="Fígado")
             estado_atual = telas.tela_inicial()
 
         elif estado_atual == telas.ESTADO_EM_BATALHA:
