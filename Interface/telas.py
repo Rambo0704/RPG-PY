@@ -21,25 +21,31 @@ def tela_inicial():
     utils.iniciar_musica("Interface/audio/figado_valente.mp3")
     BG = pygame.image.load("Interface/UI/menubg1.png").convert()
     BG = pygame.transform.scale(BG, (1920, 1080))
+
     def get_font(size):
         return pygame.font.SysFont("arialblack", size)
+
     play_image = pygame.image.load("Interface/UI/jogar1.png").convert_alpha()
     play_image = pygame.transform.scale(play_image, (350, 350))
     sair_image = pygame.image.load("Interface/UI/sair.png").convert_alpha()
     sair_image = pygame.transform.scale(sair_image, (250, 250))
     centro_x = 1920 // 2
+
     PLAY_BUTTON = ui.Button(image=play_image, x_pos=centro_x, y_pos=500)
     QUIT_BUTTON = ui.Button(image=sair_image, x_pos=centro_x, y_pos=800)
     title_image = pygame.image.load("Interface/UI/header3.png").convert_alpha()
     title_image = pygame.transform.scale(title_image, (700, 400))
     title_rect = title_image.get_rect(center=(centro_x, 200))
+
     while True:
         screen.blit(BG, (0, 0))
         MENU_MOUSE_POS = pygame.mouse.get_pos()
         screen.blit(title_image, title_rect)
+
         for button in [PLAY_BUTTON, QUIT_BUTTON]:
             button.changeColor(MENU_MOUSE_POS)
             button.update(screen)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -50,6 +56,7 @@ def tela_inicial():
                 if QUIT_BUTTON.checkClick(MENU_MOUSE_POS):
                     pygame.quit()
                     sys.exit()
+
         pygame.display.update()
 
 def executar_loja(loja, personagem):
@@ -67,6 +74,8 @@ def executar_loja(loja, personagem):
     titulo_loja_img = pygame.image.load("Interface/UI/loja.png").convert_alpha()
     titulo_loja_img = pygame.transform.scale(titulo_loja_img, (450, 370))
     titulo_loja_rect = titulo_loja_img.get_rect(center=(largura_tela // 2, 120))
+    mensagem_buff = ""
+    tempo_mensagem = 3000
 
     class ItemButton:
         def __init__(self, buff, image_path, center_x, center_y, largura=120, altura=110):
@@ -152,6 +161,9 @@ def executar_loja(loja, personagem):
             print(f"Escudo: {escudo_antes} -> {escudo_depois} {'(buffado!)' if escudo_depois != escudo_antes else ''}")
             print(f"Vida: {vida_antes} -> {vida_depois} {'(buffado!)' if vida_depois != vida_antes else ''}")
             print(f"Stamina: {stamina_antes} -> {stamina_depois} {'(buffado!)' if stamina_depois != stamina_antes else ''}")
+            nonlocal mensagem_buff, tempo_mensagem
+            mensagem_buff = f"{buff.nome} aplicado! +{buff.valor} {buff.atributo}"
+            tempo_mensagem = pygame.time.get_ticks() + 3000
         else:
             print("Moedas insuficientes para comprar este buff.")
 
@@ -180,13 +192,34 @@ def executar_loja(loja, personagem):
         botao_continuar.update(mouse_pos, mouse_click)
         botao_continuar.draw(screen)
 
-    def mostrar_luta():
-        screen.fill((10, 10, 20))
-        txt = font.render("Luta terminada! Pressione espaço para ir à loja.", True, WHITE)
-        screen.blit(txt, txt.get_rect(center=(largura_tela // 2, altura_tela // 2)))
+        if mensagem_buff and pygame.time.get_ticks() < tempo_mensagem:
+            msg_render = font.render(mensagem_buff, True, WHITE)
+            screen.blit(msg_render, msg_render.get_rect(center=(largura_tela // 2, altura_tela - 180)))
 
-        stats = font.render(f"Vida: {personagem.vida} | Ataque: {personagem.ataque} | Escudo: {personagem.escudo} | Stamina: {personagem.stamina}", True, GREEN)
-        screen.blit(stats, stats.get_rect(center=(largura_tela // 2, 50)))
+    def caminho_loja():
+        fundo_caminho_img = pygame.image.load("Interface/UI/fundo_caminho.jpg").convert()
+        fundo_caminho_img = pygame.transform.scale(fundo_caminho_img, (largura_tela, altura_tela))
+        screen.blit(fundo_caminho_img, (0, 0))
+
+        fonte_titulo = pygame.font.SysFont("arialblack", 48)
+        fonte_stats = pygame.font.SysFont("arialblack", 38)
+
+        texto_loja = "Luta terminada! Pressione espaço para ir à loja."
+        texto_stats = f"Vida Maxima: {personagem.max_vida} | Ataque: {personagem.ataque} | Escudo: {personagem.escudo} | Stamina Maxima: {personagem.max_stamina}"
+
+        txt_render = fonte_titulo.render(texto_loja, True, WHITE)
+        stats_render = fonte_stats.render(texto_stats, True, GREEN)
+
+        for dx in [-2, 0, 2]:
+            for dy in [-2, 0, 2]:
+                if dx != 0 or dy != 0:
+                    screen.blit(fonte_titulo.render(texto_loja, True, (0, 0, 0)),
+                                txt_render.get_rect(center=(largura_tela // 2 + dx, altura_tela // 2 + dy)))
+                    screen.blit(fonte_stats.render(texto_stats, True, (0, 0, 0)),
+                                stats_render.get_rect(center=(largura_tela // 2 + dx, 50 + dy)))
+
+        screen.blit(txt_render, txt_render.get_rect(center=(largura_tela // 2, altura_tela // 2)))
+        screen.blit(stats_render, stats_render.get_rect(center=(largura_tela // 2, 50)))
 
     while True:
         for event in pygame.event.get():
@@ -206,15 +239,17 @@ def executar_loja(loja, personagem):
                             aplicar_efeito(item)
 
         if estado_do_jogo == "luta":
-            mostrar_luta()
+            caminho_loja()
         elif estado_do_jogo == "loja":
             mostrar_loja()
         elif estado_do_jogo == "sair":
+            personagem.vida = personagem.max_vida
+            personagem.stamina = personagem.max_stamina
+            personagem.moedas += 50
             return "proxima_fase"
 
         pygame.display.flip()
         clock.tick(60)
-
 
 def tela_derrota():
     utils.iniciar_musica("Interface/audio/musica2_derrota.mp3")
@@ -222,14 +257,66 @@ def tela_derrota():
     fundo = pygame.image.load("Interface/UI/fundo_derrota.jpg").convert()
     fundo = pygame.transform.scale(fundo, (largura_tela, altura_tela))
     screen.blit(fundo, (0, 0))
+
     texto = "VOCÊ SUCUMBIU PARA A CIRROSE"
     fonte = fontes['grande']
     texto_surf = fonte.render(texto, True, PRETO)
     texto_rect = texto_surf.get_rect(center=(largura_tela // 2, altura_tela // 2))
     offsets_borda = [(-2, -2), (2, -2), (-2, 2), (2, 2)]
     borda_surf = fonte.render(texto, True, BRANCO)
+
     for offset_x, offset_y in offsets_borda:
         screen.blit(borda_surf, (texto_rect.x + offset_x, texto_rect.y + offset_y))
+
     screen.blit(texto_surf, texto_rect)
     pygame.display.flip()
     pygame.time.wait(5000)
+def tela_fim_de_jogo():
+    utils.iniciar_musica("Interface/audio/musica_final.mp3")
+    pygame.mouse.set_visible(True)
+    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    largura_tela, altura_tela = screen.get_size()
+
+    fundo = pygame.image.load("Interface/UI/fundo_fim.jpeg").convert()
+    fundo = pygame.transform.scale(fundo, (largura_tela, altura_tela))
+
+    fonte_titulo = pygame.font.SysFont("arial", 48, bold=True)
+    fonte_creditos = pygame.font.SysFont("arial", 36)
+    fonte_botao = pygame.font.SysFont("arial", 32)
+
+    botao_largura, botao_altura = 300, 60
+    botao_rect = pygame.Rect((largura_tela - botao_largura) // 2, altura_tela - 120, botao_largura, botao_altura)
+
+    rodando = True
+    while rodando:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
+                if botao_rect.collidepoint(evento.pos):
+                    return ESTADO_TELA_INICIAL
+
+        screen.blit(fundo, (0, 0))
+
+        mensagem = "OBRIGADO POR JOGAR FIGADO'S ADVENTURE"
+        texto_surf = fonte_titulo.render(mensagem, True, PRETO)
+        texto_rect = texto_surf.get_rect(center=(largura_tela // 2, altura_tela // 2 - 100))
+        borda_surf = fonte_titulo.render(mensagem, True, BRANCO)
+
+        for dx, dy in [(-2, -2), (2, -2), (-2, 2), (2, 2)]:
+            screen.blit(borda_surf, (texto_rect.x + dx, texto_rect.y + dy))
+        screen.blit(texto_surf, texto_rect)
+
+        nomes = ["Créditos:", "Gabriel Rambo", "Pedro Viegas", "Pedro Miguel", "Rafael Machado"]
+        for i, nome in enumerate(nomes):
+            y_pos = altura_tela // 2 + 20 + i * 50
+            nome_surf = fonte_creditos.render(nome, True, BRANCO)
+            screen.blit(nome_surf, nome_surf.get_rect(center=(largura_tela // 2, y_pos)))
+
+        pygame.draw.rect(screen, PRETO, botao_rect, border_radius=12)
+        texto_botao = fonte_botao.render("Voltar ao menu", True, BRANCO)
+        screen.blit(texto_botao, texto_botao.get_rect(center=botao_rect.center))
+
+        pygame.display.flip()
+        pygame.time.Clock().tick(60)

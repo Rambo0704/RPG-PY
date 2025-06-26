@@ -3,7 +3,7 @@ import threading
 import random
 
 class Personagem:
-    def __init__(self, nome, max_vida=100, ataque=20, escudo=0, moedas=100, max_stamina=100):
+    def __init__(self, nome, max_vida=100, ataque=20, escudo=0, moedas=80, max_stamina=100):
         self.nome = nome
         self.vida = max_vida
         self.max_vida = max_vida
@@ -26,7 +26,7 @@ class Personagem:
     def atacar(self, alvo):
         if self.stamina >= 10:
             chance_erro = random.random()
-            if chance_erro < 0.30:
+            if chance_erro < 0.20:
                 print(f"{self.nome} errou o ataque")
                 self.stamina -= 10
                 return 0
@@ -78,7 +78,7 @@ class Personagem:
             while self.stamina < self.max_stamina and (time.time() - tempo_inicial) < 20:
                 self.stamina += 1
                 self.stamina = min(self.stamina, self.max_stamina)
-                time.sleep(1)
+                time.sleep(0.5)
             print("Recuperação de stamina encerrada.")
             self.recuperando = False
 

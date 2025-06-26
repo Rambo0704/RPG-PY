@@ -4,21 +4,14 @@ from src.personagem import Personagem
 import random
 from Interface import ui, sprites, telas
 from src import utils
-from src.loja import Loja
 
 def executar_batalha_visual(jogador, inimigo, caminhos_recursos, loja=None):
     semaforo_jogador = threading.Semaphore(1)
     semaforo_inimigo = threading.Semaphore(0)
 
     caminho_musica_fase = caminhos_recursos.get('musica')
-
-    thread_musica = threading.Thread(
-        target=utils.iniciar_musica,
-        args=(caminho_musica_fase,)
-    )
-    thread_musica.daemon = True
-    thread_musica.start()
-
+    utils.iniciar_musica(caminho_musica_fase)
+    
     pygame.init()
     info = pygame.display.Info()
     largura_tela, altura_tela = info.current_w, info.current_h
