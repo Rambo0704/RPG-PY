@@ -7,7 +7,7 @@ from src.loja import Loja
 FASES = [
     {
         "nome_inimigo": "Cerveja",
-        "ataque_inimigo": 150, "defesa_inimigo": 5, "stamina_inimigo": 200,
+        "ataque_inimigo": 15, "defesa_inimigo": 5, "stamina_inimigo": 200,
         "caminhos": {
             "fundo": "Interface/sprites/arena.jpg",
             "inimigo": "Interface/sprites/cerveja.png",
@@ -59,7 +59,6 @@ def rodar_jogo():
                 ataque=fase_data["ataque_inimigo"], escudo=fase_data["defesa_inimigo"], max_stamina=fase_data["stamina_inimigo"]
             )
             resultado = executar_batalha_visual(jogador, inimigo_atual, fase_data["caminhos"])
-
             if resultado == "derrota" or resultado == "fugiu":
                 estado_atual = telas.ESTADO_FIM_DE_JOGO
             elif resultado == "vitoria":

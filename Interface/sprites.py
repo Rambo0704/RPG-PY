@@ -1,5 +1,5 @@
 import pygame
-from . import ui # Importação relativa do nosso módulo de UI
+from . import ui 
 
 def carregar_recursos_batalha(largura_tela, altura_tela, caminho_fundo, caminho_sprite_inimigo):
     recursos = {}
@@ -47,7 +47,7 @@ def animar_acao(screen, clock, recursos, personagens, posicoes, mensagem, lado, 
         ui.draw_text(screen, f"{inimigo.nome}", inimigo_nome_x, inimigo_nome_y, font_nome, center=True)
         ui.draw_bar(screen, inimigo_nome_x - ui.LARGURA_BARRA_HUD // 2, inimigo_nome_y + 30, inimigo.max_vida, inimigo.vida, ui.RED)
 
-        # Mensagem de ação
+
         ui.draw_text(screen, mensagem, screen.get_width() // 2, screen.get_height() // 4, font_grande, center=True)
         
         pygame.display.flip()

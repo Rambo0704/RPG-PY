@@ -1,6 +1,7 @@
 import time
 import threading
 import random
+
 class Personagem:
     def __init__(self, nome, max_vida=100, ataque=20, escudo=0, moedas=100, max_stamina=100):
         self.nome = nome
@@ -11,7 +12,7 @@ class Personagem:
         self.moedas = moedas
         self.stamina = max_stamina
         self.max_stamina = max_stamina
-        self.recuperando = False  # Flag para controle da thread
+        self.recuperando = False
 
     def esta_vivo(self):
         return self.vida > 0
@@ -24,8 +25,8 @@ class Personagem:
 
     def atacar(self, alvo):
         if self.stamina >= 10:
-            chance_erro = random.random() #numero entre 0 e 1
-            if chance_erro < 0.30: ##probabilidade de 30% de errar
+            chance_erro = random.random()
+            if chance_erro < 0.30:
                 print(f"{self.nome} errou o ataque")
                 self.stamina -= 10
                 return 0
@@ -72,11 +73,13 @@ class Personagem:
 
         def processo_recuperacao():
             self.recuperando = True
-            print("Iniciando recuperação de stamina...")
-            while self.stamina < self.max_stamina:
+            print("Iniciando recuperação de stamina por 20 segundos")
+            tempo_inicial = time.time()
+            while self.stamina < self.max_stamina and (time.time() - tempo_inicial) < 20:
                 self.stamina += 1
+                self.stamina = min(self.stamina, self.max_stamina)
                 time.sleep(1)
-            print("Stamina cheia!")
+            print("Recuperação de stamina encerrada.")
             self.recuperando = False
 
         threading.Thread(target=processo_recuperacao, daemon=True).start() ##usando o conceito de Thread para que  o processo de recuperaçao de stamina ocorra em segundo plano.
@@ -90,13 +93,12 @@ class Personagem:
         print(f"Stamina: {self.stamina}/{self.max_stamina}")
 
     def aplicar_buff(self, atributo, valor):
-      if atributo == "ataque":
-          self.ataque += valor
-      elif atributo == "escudo":
-           self.escudo += valor
-      elif atributo == "vida":
-          self.vida += valor
-      else:
-          print(f"Atributo {atributo} não reconhecido.")
-        
-      print(f"{self.nome} recebeu +{valor} de {atributo}!")
+        if atributo == "ataque":
+            self.ataque += valor
+        elif atributo == "escudo":
+            self.escudo += valor
+        elif atributo == "vida":
+            self.vida += valor
+        else:
+            print(f"Atributo {atributo} não reconhecido.")
+        print(f"{self.nome} recebeu +{valor} de {atributo}!")

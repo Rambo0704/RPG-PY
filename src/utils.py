@@ -1,6 +1,6 @@
 import pygame
 
-def iniciar_musica(caminho_musica, volume=0.5):
+def iniciar_musica(caminho_musica, volume=0.2):
     if not caminho_musica:
         print("Aviso: Nenhum caminho de música fornecido.")
         return
