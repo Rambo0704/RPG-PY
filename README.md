@@ -57,12 +57,3 @@ Após cada vitória, o jogador ganha moedas e acesso a uma loja onde pode compra
 * **Python:** Linguagem de programação principal do projeto.
 * **Pygame:** Biblioteca utilizada para a criação da interface gráfica, manipulação de sprites, áudio e eventos do jogo.
 
-## 👥 Créditos
-
-Este projeto foi desenvolvido por:
-* Gabriel Rambo
-* Pedro Viegas
-* Pedro Miguel
-* Rafael Machado
-
-*(Créditos mencionados na tela de fim de jogo do projeto)*
