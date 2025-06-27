@@ -17,6 +17,11 @@ O jogo foi desenvolvido em Python com a biblioteca Pygame para a criação da in
 * **Interface Gráfica Completa:** O jogo conta com telas de menu, batalha, loja e fim de jogo, todas construídas com Pygame, incluindo sprites para os personagens, barras de status e botões interativos.
 * **Trilha Sonora:** Músicas de fundo com o sistema de Threads são utilizadas para criar a atmosfera do menu, das batalhas e das telas de vitória/derrota.
 
+## ⚠️ Aviso Importante
+
+A música na **tela de derrota** pode estar com o volume muito alto ("estourado"). Recomendamos abaixar o som do seu dispositivo antes de jogar para uma melhor experiência.
+
+
 ## 🚀 Como Executar
 
 Para rodar o projeto, você precisará ter o Python e o Pygame instalados.
